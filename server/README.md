@@ -44,3 +44,14 @@ Create your own copy of `secrets.js` by copying the example from
   `localhost` if running via Docker.
 - `postgresPassword`: The password needed to connect to the Postgres database.
   This will be `food_finder_pw` if running via Docker.
+
+## API
+### GET /api/businesses/:id
+Get the business information for a business. ID can be either the Yelp business
+ID, or the Yelp business alias. The business alias is the identifier at the end
+of Yelp business URLs.
+
+### GET /api/bookmarks
+#### Parameters
+- `user`: *Required* The user for whom to fetch bookmarks.
+Get all the bookmarks for a user.

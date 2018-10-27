@@ -2,18 +2,23 @@ const cors = require('cors');
 const express = require('express');
 const secrets = require('./secrets');
 const yelp = require('yelp-fusion');
+const PostgresClient = require('pg').Client;
 
-/*
- * API:
- * GET /api/businesses/:id
- *   Get the business information for a business. ID can be either the Yelp
- *   business ID, or the Yelp business alias. The business alias is the
- *   identifier at the end of Yelp business URLs.
- */
-function newApp() {
+async function newApp() {
   const app = express();
   app.use(cors());
+
   const yelpClient = yelp.client(secrets.yelpAPIKey);
+
+  const pgClient = new PostgresClient({
+    user: 'food_finder',
+    host: secrets.postgresHost,
+    database: 'food_finders',
+    password: secrets.postgresPassword,
+    port: 5432,
+  });
+  console.log('Connecting to Postgres...');
+  await pgClient.connect();
 
   app.get('/api/businesses/:id', async function(req, res) {
     const businessID = req.params.id;
@@ -31,12 +36,38 @@ function newApp() {
   });
 
   app.get('/api/bookmarks', async function(req, res) {
-    res.json([
-      {
-        id: 'id',
-        tags: ['chinese', 'asian', 'brunch'],
-      },
-    ]);
+    const user = req.query.user;
+    if (!user) {
+      res.status(500);
+      res.json({ error: 'a user is required' });
+      return;
+    }
+
+    try {
+      const bookmarks = (await pgClient.query({
+        text: 'SELECT * FROM bookmarks WHERE owner_id = $1',
+        values: [user]
+      })).rows;
+
+      const businesses = (await pgClient.query({
+        text: 'SELECT * FROM businesses WHERE id = ANY($1)',
+        values: [bookmarks.map(bm => bm.business_id)],
+      })).rows;
+      const businessesMap = {};
+      businesses.forEach((business) => {
+        businessesMap[business.id] = business
+      });
+
+      // Add the extra information from the business query.
+      for (let i = 0; i < bookmarks.length; i++) {
+        bookmarks[i].business = businessesMap[bookmarks[i].business_id];
+      }
+
+      res.json({ results: bookmarks });
+    } catch (err) {
+      res.status(500);
+      res.json({ error: err.toString() });
+    }
   });
 
   app.get('/api/bookmarks/:id', async function(req, res) {
@@ -49,7 +80,7 @@ function newApp() {
 }
 
 async function main() {
-  const app = newApp();
+  const app = await newApp();
 
   const port = process.env.PORT || 8888;
   console.log(`Listening on ${port}`);

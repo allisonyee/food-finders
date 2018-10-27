@@ -1,25 +1,53 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
+import axios from 'axios';
+import { startsWith } from 'lodash';
 import './App.css';
 
 class App extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      business: null
+    };
+
+    this.server = 'http://192.168.1.11:8888';
+    this.urlInput = React.createRef();
+  }
+
+  parseAlias(inputURL) {
+    const url = new URL(inputURL);
+    if (url.host.indexOf('yelp.com') === -1) throw 'Not a Yelp URL!';
+    if (startsWith(url.pathname, '/biz/')) return url.pathname.slice(5);
+    throw 'Invalid URL';
+  }
+
+  getYelpBusiness(alias) {
+    return axios.get(`${this.server}/api/businesses/${alias}`).then(res => {
+      return res.data;
+    });
+  }
+
+  onClick = event => {
+    event.preventDefault();
+    const url = this.urlInput.current.value;
+    this.getYelpBusiness(this.parseAlias(url)).then(business => {
+      this.setState({ business });
+    });
+  };
+
   render() {
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <form>
+          <label htmlFor="url">Yelp URL</label>
+          <input ref={this.urlInput} type="text" name="url" />
+          <button onClick={this.onClick}>Save</button>
+        </form>
+        <div>
+          <strong>Business data:</strong>
+          <div>{JSON.stringify(this.state.business)}</div>
+        </div>
       </div>
     );
   }

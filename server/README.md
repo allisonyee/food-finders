@@ -55,3 +55,18 @@ of Yelp business URLs.
 #### Parameters
 - `user`: *Required* The user for whom to fetch bookmarks.
 Get all the bookmarks for a user.
+
+### POST /api/bookmark
+Save a bookmark.
+
+#### Parameters
+- `user`: *Required* The user for whom to save the bookmark.
+- `tags`: *Optional* A list of tags to associated with the bookmark.
+- `business`: *Required* The business to associate with the bookmark.
+    - `id`: *Required* The Yelp alias of the business.
+
+#### Example
+```
+curl -X POST -H "Content-Type: application/json" -d '{"user":"kevin", "bookmark":{"business":{"id":"noma"},"tags":["fancy"]}}' localhost:8888/api/bookmark
+{"status":"success"}
+```

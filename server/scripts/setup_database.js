@@ -39,20 +39,20 @@ async function main() {
 async function createTables(pgClient) {
   console.log('Creating businesses table...');
   await pgClient.query(`CREATE TABLE businesses (
-    id text
+    id TEXT UNIQUE PRIMARY KEY
   )`)
 
   console.log('Creating bookmarks table...');
   await pgClient.query(`CREATE TABLE bookmarks (
-    id text,
-    owner_id text,
-    business_id text,
-    tags text[]
+    id TEXT UNIQUE PRIMARY KEY,
+    owner_id TEXT,
+    business_id TEXT,
+    tags TEXT[]
   )`)
 
   console.log('Creating users table...');
   await pgClient.query(`CREATE TABLE users (
-    id text
+    id TEXT UNIQUE PRIMARY KEY
   )`)
 }
 

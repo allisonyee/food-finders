@@ -70,9 +70,6 @@ async function newApp() {
     }
   });
 
-  app.get('/api/bookmarks/:id', async function(req, res) {
-  });
-
   app.post('/api/bookmarks/:id', async function(req, res) {
   });
 

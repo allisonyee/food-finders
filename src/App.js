@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { startsWith } from 'lodash';
+import BusinessProfile from './business-profile';
 import './App.css';
 
 class App extends Component {
@@ -46,7 +47,11 @@ class App extends Component {
         </form>
         <div>
           <strong>Business data:</strong>
-          <div>{JSON.stringify(this.state.business)}</div>
+          {this.state.business ? (
+            <BusinessProfile business={this.state.business} />
+          ) : (
+            'Loading...'
+          )}
         </div>
       </div>
     );

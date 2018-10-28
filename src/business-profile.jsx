@@ -1,9 +1,25 @@
 import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import { map } from 'lodash';
-import './App.css';
+import './styles/App.css';
+
+const propTypes = {
+  business: PropTypes.shape({
+    name: PropTypes.string,
+    location: PropTypes.object,
+    photos: PropTypes.array,
+  }).isRequired,
+};
 
 class BusinessProfile extends Component {
+  constructor(props) {
+    super(props);
+
+    this.state = {
+      isOpen: false,
+    };
+  }
+
   render() {
     const { name, location, photos } = this.props.business;
 
@@ -25,8 +41,6 @@ class BusinessProfile extends Component {
   }
 }
 
-BusinessProfile.propTypes = {
-  business: PropTypes.object.isRequired
-};
+BusinessProfile.propTypes = propTypes;
 
 export default BusinessProfile;

@@ -2,29 +2,23 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { startsWith } from 'lodash';
 import BusinessProfile from './business-profile';
-import './App.css';
+import './styles/App.css';
 
 class App extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      business: null
+      business: null,
     };
 
     this.server = 'http://192.168.1.11:8888';
     this.urlInput = React.createRef();
   }
 
-  parseAlias(inputURL) {
-    const url = new URL(inputURL);
-    if (url.host.indexOf('yelp.com') === -1) throw 'Not a Yelp URL!';
-    if (startsWith(url.pathname, '/biz/')) return url.pathname.slice(5);
-    throw 'Invalid URL';
-  }
-
   getYelpBusiness(alias) {
     return axios.get(`${this.server}/api/businesses/${alias}`).then(res => {
+      console.log(res);
       return res.data;
     });
   }
@@ -37,21 +31,30 @@ class App extends Component {
     });
   };
 
+  parseAlias(inputURL) {
+    const url = new URL(inputURL);
+    if (url.host.indexOf('yelp.com') === -1) throw new Error('Not a Yelp URL!');
+    if (startsWith(url.pathname, '/biz/')) return url.pathname.slice(5);
+    throw new Error('Invalid URL');
+  }
+
   render() {
+    const { business } = this.state;
+
     return (
       <div className="App">
         <form>
-          <label htmlFor="url">Yelp URL</label>
-          <input ref={this.urlInput} type="text" name="url" />
-          <button onClick={this.onClick}>Save</button>
+          <label htmlFor="url">
+            Yelp URL
+            <input ref={this.urlInput} type="text" name="url" />
+          </label>
+          <button onClick={this.onClick} type="submit">
+            Save
+          </button>
         </form>
         <div>
           <strong>Business data:</strong>
-          {this.state.business ? (
-            <BusinessProfile business={this.state.business} />
-          ) : (
-            'Loading...'
-          )}
+          {business ? <BusinessProfile business={business} /> : 'Loading...'}
         </div>
       </div>
     );

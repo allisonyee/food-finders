@@ -1,7 +1,37 @@
+@import 'variables.less';
+
 @dialog_width: 400px;
 @dialog_height: 500px;
 
 .profile {
   width: @dialog_width;
   height: @dialog_height;
+  box-shadow: 0 0 9px 5px rgba(187, 187, 187, 0.5);
+  border-radius: @border_radius;
+}
+
+.profile__content {
+  padding: @spacing_24;
+}
+
+.profile__photo {
+  height: 140px;
+  background-size: cover;
+  background-position: center;
+  border-radius: @border_radius @border_radius 0 0;
+}
+
+.profile__name {
+  margin: 0;
+  .display_as_h1;
+}
+
+.profile__section_header {
+  .display_as_h2;
+  display: inline-block;
+  margin-right: 8px;
+}
+
+.profile__edit_btn {
+  display: inline-block;
 }

@@ -2,10 +2,9 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { startsWith } from 'lodash';
-import './styles/App.css';
 
 const propTypes = {
-  server: PropTypes.string,
+  server: PropTypes.string.isRequired,
 };
 
 class AddBookmarkDialog extends Component {
@@ -56,8 +55,6 @@ class AddBookmarkDialog extends Component {
   }
 
   render() {
-    const { business } = this.state;
-
     return (
       <form>
         <label htmlFor="url">

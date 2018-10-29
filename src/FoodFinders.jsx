@@ -1,7 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
 import { map } from 'lodash';
-import './styles/App.css';
 
 class FoodFinders extends Component {
   constructor(props) {

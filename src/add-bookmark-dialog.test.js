@@ -1,15 +1,15 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
-import App from './App';
+import AddBookmarkDialog from './add-bookmark-dialog';
 
 it('renders without crashing', () => {
   const div = document.createElement('div');
-  ReactDOM.render(<App />, div);
+  ReactDOM.render(<AddBookmarkDialog />, div);
   ReactDOM.unmountComponentAtNode(div);
 });
 
 describe('parseAlias', () => {
-  const app = new App();
+  const app = new AddBookmarkDialog();
 
   it('should throw an error when a non-Yelp URL is entered', () => {
     const url = 'https://www.google.com/';

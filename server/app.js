@@ -29,7 +29,7 @@ async function newApp() {
     } catch (err) {
       res.status(500);
       if (err.response) {
-        res.json(err.response)
+        res.json(err.response);
       } else {
         res.json({ error: err.toString() });
       }
@@ -47,7 +47,7 @@ async function newApp() {
     try {
       const bookmarks = (await pgClient.query({
         text: 'SELECT * FROM bookmarks WHERE owner_id = $1',
-        values: [user]
+        values: [user],
       })).rows;
 
       const businesses = (await pgClient.query({
@@ -55,8 +55,8 @@ async function newApp() {
         values: [bookmarks.map(bm => bm.business_id)],
       })).rows;
       const businessesMap = {};
-      businesses.forEach((business) => {
-        businessesMap[business.id] = business
+      businesses.forEach(business => {
+        businessesMap[business.id] = business;
       });
 
       // Add the extra information from the business query.
@@ -72,7 +72,7 @@ async function newApp() {
   });
 
   const requiredBookmarkFields = [];
-  const requiredBusinessFields = ['id'];
+  const requiredBusinessFields = ['id', 'data'];
   app.post('/api/bookmark', async function(req, res) {
     const user = req.body.user;
     if (!user) {
@@ -88,7 +88,7 @@ async function newApp() {
       return;
     }
     if (!assertFields(res, 'bookmark', bookmark, requiredBookmarkFields)) {
-      return
+      return;
     }
 
     const business = bookmark.business;
@@ -98,22 +98,24 @@ async function newApp() {
       return;
     }
     if (!assertFields(res, 'business', business, requiredBusinessFields)) {
-      return
+      return;
     }
 
     try {
       await pgClient.query({
-        text: `INSERT INTO bookmarks (id, business_id, owner_id, tags)
-                VALUES ($1, $2, $3, $4)
+        text: `INSERT INTO bookmarks (id, business_id, owner_id, tags, notes)
+                VALUES ($1, $2, $3, $4, $5)
                 ON CONFLICT (id)
                 DO
                   UPDATE
-                    SET tags = EXCLUDED.tags`,
+                    SET tags = EXCLUDED.tags,
+                        notes = EXCLUDED.notes`,
         values: [
           `${user}-${business.id}`,
           business.id,
           user,
           bookmark.tags || [],
+          bookmark.notes || '',
         ],
       });
     } catch (err) {
@@ -124,14 +126,12 @@ async function newApp() {
 
     try {
       await pgClient.query({
-        text: `INSERT INTO businesses (id)
-                VALUES ($1)
+        text: `INSERT INTO businesses (id, data)
+                VALUES ($1, $2)
                 ON CONFLICT (id) DO
                   UPDATE
-                    SET id = EXCLUDED.id`,
-        values: [
-          business.id,
-        ],
+                    SET data = EXCLUDED.data`,
+        values: [business.id, business.data],
       });
     } catch (err) {
       res.status(500);
@@ -149,7 +149,7 @@ async function newApp() {
 function assertFields(res, objectName, object, fields) {
   for (let i = 0; i < fields.length; i++) {
     const field = fields[i];
-    if (! (field in object)) {
+    if (!(field in object)) {
       res.status(500);
       res.json({ error: `\`${objectName}.${field}\` is required` });
       return false;

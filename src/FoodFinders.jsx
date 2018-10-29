@@ -2,20 +2,24 @@ import React, { Component } from 'react';
 import axios from 'axios';
 import { map, isEmpty } from 'lodash';
 
+import AddBookmarkDialog from './add-bookmark-dialog';
+
 class FoodFinders extends Component {
   constructor(props) {
     super(props);
 
     this.state = {
       bookmarks: [],
+      isModalOpen: false,
     };
 
     this.server = 'http://192.168.1.11:8888';
     this.urlInput = React.createRef();
+    this.user = 'kevin';
   }
 
   componentDidMount() {
-    this.getBookmarks('kevin');
+    this.getBookmarks(this.user);
   }
 
   async getBookmarks(user) {
@@ -33,9 +37,17 @@ class FoodFinders extends Component {
           tags,
         };
       });
-      this.setState(() => ({ bookmarks }));
+      this.setState({ bookmarks });
     });
   }
+
+  openModal = () => {
+    this.setState({ isModalOpen: true });
+  };
+
+  closeModal = () => {
+    this.setState({ isModalOpen: false });
+  };
 
   renderBookmark(bookmark) {
     const { id, tags } = bookmark;
@@ -59,6 +71,19 @@ class FoodFinders extends Component {
     return map(bookmarks, bookmark => this.renderBookmark(bookmark));
   }
 
+  renderAddBookmarkDialog() {
+    const { isModalOpen } = this.state;
+
+    return (
+      <AddBookmarkDialog
+        server={this.server}
+        user={this.user}
+        isModalOpen={isModalOpen}
+        closeModal={this.closeModal}
+      />
+    );
+  }
+
   render() {
     return (
       <div className="food_finders__main">
@@ -66,8 +91,10 @@ class FoodFinders extends Component {
         <div className="main__content">
           <h1>Food Finders</h1>
           <h2>Bookmarks</h2>
+          <button onClick={this.openModal}>Add bookmark</button>
           <ul className="main__list">{this.renderBookmarks()}</ul>
         </div>
+        {this.renderAddBookmarkDialog()}
       </div>
     );
   }

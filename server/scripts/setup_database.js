@@ -48,7 +48,8 @@ async function createTables(pgClient) {
     id TEXT UNIQUE PRIMARY KEY,
     owner_id TEXT,
     business_id TEXT,
-    tags TEXT[]
+    tags TEXT[],
+    notes TEXT
   )`);
 
   console.log('Creating users table...');

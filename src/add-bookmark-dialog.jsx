@@ -2,9 +2,15 @@ import React, { Component } from 'react';
 import PropTypes from 'prop-types';
 import axios from 'axios';
 import { startsWith } from 'lodash';
+import Modal from 'react-modal';
+
+Modal.setAppElement('#root');
 
 const propTypes = {
   server: PropTypes.string.isRequired,
+  user: PropTypes.string.isRequired,
+  isModalOpen: PropTypes.bool.isRequired,
+  closeModal: PropTypes.func.isRequired,
 };
 
 class AddBookmarkDialog extends Component {
@@ -19,7 +25,9 @@ class AddBookmarkDialog extends Component {
   }
 
   getYelpBusiness(alias) {
-    return axios.get(`${this.server}/api/businesses/${alias}`).then(res => {
+    const { server } = this.props;
+
+    return axios.get(`${server}/api/businesses/${alias}`).then(res => {
       console.log(res);
       return res.data;
     });
@@ -29,7 +37,8 @@ class AddBookmarkDialog extends Component {
     event.preventDefault();
     const url = this.urlInput.current.value;
     this.getYelpBusiness(this.parseAlias(url)).then(business => {
-      this.setState({ business });
+      // this.setState({ business });
+      this.saveBookmark(business);
     });
   };
 
@@ -40,13 +49,24 @@ class AddBookmarkDialog extends Component {
     throw new Error('Invalid URL');
   }
 
-  saveBookmark(user, business, { tags = null, notes = null }) {
+  saveBookmark(business, { tags, notes } = { tags: null, notes: null }) {
+    const { user, server } = this.props;
+    console.log(business);
+    const newBookmark = {
+      user,
+      bookmark: {
+        business: {
+          id: business.alias,
+          data: JSON.stringify(business),
+        },
+      },
+    };
+    if (tags) newBookmark.bookmark.tags = tags;
+    if (notes) newBookmark.bookmark.notes = notes;
+
     axios
-      .post(`${this.server}/api/bookmark`, {
-        user,
-        business,
-        tags,
-        notes,
+      .post(`${server}/api/bookmark`, newBookmark, {
+        headers: { 'Content-Type': 'application/json' },
       })
       .then(resp => {
         console.log(resp);
@@ -55,16 +75,25 @@ class AddBookmarkDialog extends Component {
   }
 
   render() {
+    const { isModalOpen, closeModal } = this.props;
+
     return (
-      <form>
-        <label htmlFor="url">
-          Yelp URL
-          <input ref={this.urlInput} type="text" name="url" />
-        </label>
-        <button onClick={this.onClick} type="submit">
-          Save
-        </button>
-      </form>
+      <Modal
+        isOpen={isModalOpen}
+        onAfterOpen={this.afterOpenModal}
+        onRequestClose={closeModal}
+        contentLabel="Add bookmark"
+      >
+        <form>
+          <label htmlFor="url">
+            Yelp URL
+            <input ref={this.urlInput} type="text" name="url" />
+          </label>
+          <button onClick={this.onClick} type="submit">
+            Save
+          </button>
+        </form>
+      </Modal>
     );
   }
 }

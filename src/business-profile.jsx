@@ -49,13 +49,14 @@ class BusinessProfile extends Component {
   }
 
   render() {
-    const { name, photos } = this.props.business;
+    const { business } = this.props;
+    const { name } = business;
 
     return (
       <div className="profile">
         <div
           className="profile__photo"
-          style={{ backgroundImage: `url(${photos[0]})` }}
+          style={{ backgroundImage: `url(${business.image_url})` }}
         />
         <div className="profile__content">
           <h1 className="profile__name">{name}</h1>

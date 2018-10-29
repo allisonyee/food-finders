@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import axios from 'axios';
-import { startsWith } from 'lodash';
+import { map, startsWith } from 'lodash';
 import BusinessProfile from './business-profile';
 import './styles/App.css';
 
@@ -14,6 +14,29 @@ class App extends Component {
 
     this.server = 'http://192.168.1.11:8888';
     this.urlInput = React.createRef();
+    this.bookmarks = [];
+  }
+
+  componentDidMount() {
+    this.getBookmarks('kevin');
+  }
+
+  async getBookmarks(user) {
+    return axios.get(`${this.server}/api/bookmarks?user=${user}`).then(resp => {
+      const bookmarks = resp.data.results;
+      this.bookmarks = map(bookmarks, bookmark => {
+        const { business_id, id, owner_id, tags } = bookmark;
+        const business = JSON.parse(bookmark.business.data);
+
+        return {
+          business,
+          businessId: business_id,
+          id,
+          ownerId: owner_id,
+          tags,
+        };
+      });
+    });
   }
 
   getYelpBusiness(alias) {
@@ -36,6 +59,20 @@ class App extends Component {
     if (url.host.indexOf('yelp.com') === -1) throw new Error('Not a Yelp URL!');
     if (startsWith(url.pathname, '/biz/')) return url.pathname.slice(5);
     throw new Error('Invalid URL');
+  }
+
+  saveBookmark(user, business, { tags = null, notes = null }) {
+    axios
+      .post(`${this.server}/api/bookmark`, {
+        user,
+        business,
+        tags,
+        notes,
+      })
+      .then(resp => {
+        console.log(resp);
+        return resp;
+      });
   }
 
   render() {

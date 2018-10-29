@@ -39,8 +39,9 @@ async function main() {
 async function createTables(pgClient) {
   console.log('Creating businesses table...');
   await pgClient.query(`CREATE TABLE businesses (
-    id TEXT UNIQUE PRIMARY KEY
-  )`)
+    id TEXT UNIQUE PRIMARY KEY,
+    data TEXT
+  )`);
 
   console.log('Creating bookmarks table...');
   await pgClient.query(`CREATE TABLE bookmarks (
@@ -48,26 +49,38 @@ async function createTables(pgClient) {
     owner_id TEXT,
     business_id TEXT,
     tags TEXT[]
-  )`)
+  )`);
 
   console.log('Creating users table...');
   await pgClient.query(`CREATE TABLE users (
     id TEXT UNIQUE PRIMARY KEY
-  )`)
+  )`);
 }
 
 const mockBusinesses = [
   {
-    id: 'la-taqueria-san-francisco-2',
+    id: 'nopa-san-francisco',
+    data: `{
+      "coordinates": {
+        "latitude": 37.77483,
+        "longitude": -122.43746
+      },
+      "image_url": "https://s3-media3.fl.yelpcdn.com/bphoto/M8lkaDkG8GChJ1qvXhtLNw/o.jpg",
+      "location": {
+        "display_address": ["560 Divisadero St", "San Francisco, CA 94117"]
+      },
+      "name": "Nopa",
+      "url": "https://www.yelp.com/biz/nopa-san-francisco?adjust_creative=ggmevi68gKoy7JWJ741WEQ&utm_campaign=yelp_api_v3&utm_medium=api_v3_business_lookup&utm_source=ggmevi68gKoy7JWJ741WEQ"
+    }`,
   },
 ];
 
 const mockBookmarks = [
   {
-    id: 'kevin-la-taqueria-san-francisco-2',
+    id: 'kevin-nopa-san-francisco',
     owner_id: 'kevin',
-    business_id: 'la-taqueria-san-francisco-2',
-    tags: ['mexican', 'quick'],
+    business_id: 'nopa-san-francisco',
+    tags: ['brunch', 'new american'],
   },
 ];
 
@@ -82,8 +95,8 @@ async function seedDatabase(pgClient) {
   for (let i = 0; i < mockBusinesses.length; i++) {
     const business = mockBusinesses[i];
     await pgClient.query({
-      text: 'INSERT INTO businesses(id) VALUES ($1)',
-      values: [business.id]
+      text: 'INSERT INTO businesses(id, data) VALUES ($1, $2)',
+      values: [business.id, business.data],
     });
   }
 
@@ -91,8 +104,14 @@ async function seedDatabase(pgClient) {
   for (let i = 0; i < mockBookmarks.length; i++) {
     const bookmark = mockBookmarks[i];
     await pgClient.query({
-      text: 'INSERT INTO bookmarks(id, owner_id, business_id, tags) VALUES ($1, $2, $3, $4)',
-      values: [bookmark.id, bookmark.owner_id, bookmark.business_id, bookmark.tags],
+      text:
+        'INSERT INTO bookmarks(id, owner_id, business_id, tags) VALUES ($1, $2, $3, $4)',
+      values: [
+        bookmark.id,
+        bookmark.owner_id,
+        bookmark.business_id,
+        bookmark.tags,
+      ],
     });
   }
 

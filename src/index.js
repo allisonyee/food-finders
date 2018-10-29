@@ -1,7 +1,7 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import './styles/index.css';
-import FoodFinders from './App';
+import FoodFinders from './FoodFinders';
 import * as serviceWorker from './serviceWorker';
 
 /* eslint-disable react/jsx-filename-extension */
